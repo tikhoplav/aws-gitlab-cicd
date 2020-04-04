@@ -32,11 +32,44 @@ At this step we will create role that will be injected to EC2 instance. This rol
   - Role description *(Optional)* - `Allows EC2 instance to pull and push Docker images to ECR`;
 - `Create role`.
 
+The purpose of giving a GitLab runner full access to ECR is that give you an ability to delete repositories through CI/CD pipeline. For example, you could create a special job, that will unregister you microservice, clean up and set free all resources. If you feel that this permissions is more than you can allow runner to have, you could use `AmazonEC2ContainerRegistryPowerUser` policy instead.
+
 Later, if you would like to grant more permissions to GitLab Runner instance, for example, to use **S3** to cache builds etc, you could add more policies to this [role](https://console.aws.amazon.com/iam/home#/roles/gitlab-runner). New permissions would automatically applied to all running instances using this role.
 
 ## Create EC2 instance
 
+At this step we will create a prototype EC2 instance. Later we will use this to create custom AMI in order to minimize time consumption for each new GitLab Runner.
+
+- Go to [instances management console](https://console.aws.amazon.com/ec2/v2/home?#Instances);
+- `Launch instance`:
+  - Choose an Amazon Machine Image - select `Amazon Linux 2 AMI`;
+  - Choose an Instance Type - select `t2.micro` *(make sure that free tier is available)*;
+- `Next: Configure Instance Details`:
+  - Auto-assign Public IP - `Enable` *(or `Use subnet settings (Enable)`)*;
+  - IAM role - select `gitlab-runner`;
+  - Leave everything else by default;
+- `Next: Add Storage`:
+- `Next: Add Tags`:
+  - *(Optional)* I suggest to add `Name` tag with value - `proto gitlab-runner`;
+- `Next: Configure Security Group`:
+  - Select `Create a new security group`;
+  - Security group name - `proto gitlab-runner`;
+  - Description - `Allows SSH access to gitlab-runner prototype instance`;
+  - Make sure that rule for port `22` and source `0.0.0.0/0` exists;
+- `Next: Review and Launch`;
+- `Launch`:
+  - Here you will be asked to use existent or to create a new key pair. I suggest you to create special key pair for GitLab Runner prototype, but you could use one key pair for all of your future instances, or even use existent. It is ok, since access to working GitLab Runners will be restricted anyway.
+
+After this you will see new ec2 instance in you instances console. For later steps we will have to establish SSH connection with prototype using `.pem` key file. For simplicity, let's say that the key is called `ec2.pem`. Make sure that `ec2.pem` file have permissions lower or equal to 600, otherwise SSH connection will fail.
+
 ## Prepare EC2 instance
+
+After your new instance receive status `running`, you should be able to connect it via SSH. But before we need to figure out it's public ip address. This can be done by clicking our `proto gitlab-runner`, and search graph called `IPv4 Public IP` in the details.
+
+All of the following commands in this section should be executed at runner instance. To do so, next command can be used to establish SSH connection:
+```
+ssh -i <path to .pem file>/ec2.pem ec2-user@<proto gitlab-runner public ip>
+```
 
 ### Install Docker
 
