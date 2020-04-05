@@ -15,7 +15,7 @@ as well as to push this images to the ECR during CI/CD pipeline.
  
 Current method can be applied to create specific project runner as well as group runner.
 
-<br><br><br><br>
+<br><br><br>
 
 ## Create GitLab Runner IAM Role
 
@@ -40,7 +40,7 @@ The purpose of giving a GitLab runner full access to ECR is that give you an abi
 
 Later, if you would like to grant more permissions to GitLab Runner instance, for example, to use **S3** to cache builds etc, you could add more policies to this [role](https://console.aws.amazon.com/iam/home#/roles/gitlab-runner). New permissions would automatically applied to all running instances using this role.
 
-<br><br><br><br>
+<br><br><br>
 
 ## Create EC2 instance
 
@@ -70,7 +70,7 @@ At this step we will create a prototype EC2 instance. Later we will use this to 
 
 After this you will see new ec2 instance in you instances console. For later steps we will have to establish SSH connection with prototype using `.pem` key file. For simplicity, let's say that the key is called `ec2.pem`. Make sure that `ec2.pem` file have permissions lower or equal to 600, otherwise SSH connection will fail.
 
-<br><br><br><br>
+<br><br><br>
 
 ## Prepare EC2 instance
 
@@ -86,7 +86,7 @@ Now we can test that docker is running by executing:
 sudo docker info
 ```
 
-<br><br><br>
+<br><br>
 
 #### Esablish ECR connection
 
@@ -98,7 +98,7 @@ Before we can push and pull Docker images to ECR, we have to login our Docker da
 sudo yum install -y amazon-ecr-credential-helper
 ```
 
-<br><br>
+<br>
 
 Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You could find that opening [ECR management console](https://console.aws.amazon.com/ecr/).
 
@@ -113,7 +113,7 @@ Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You
 >
 > The actual image we are using here is not important, later we will delete it from instance. Only thing is matter, is that this image have to be stored in the ECR you are plannig to use with CI/CD pipeline.
 
-<br><br>
+<br>
 
 Now we need to aquire the token and store it with help of credential helper. To achive that we could use [this approach](https://github.com/awslabs/amazon-ecr-credential-helper/issues/63#issuecomment-328318116):
 
@@ -123,7 +123,7 @@ sudo $(aws ecr get-login --no-include-email --region $REGION) \
   && sudo docker pull $IMAGE
 ```
 
-<br><br>
+<br>
 
 After image is downloaded we can make sure that Docker login is cached, by running following command. The answer have to be similar:
 
@@ -131,7 +131,7 @@ After image is downloaded we can make sure that Docker login is cached, by runni
 sudo docker-credential-ecr-login list
 {"https://678005261235.dkr.ecr.eu-central-1.amazonaws.com":"AWS"}
 ```
-<br><br><br>
+<br><br>
 
 #### Install GitLab Runner
 
@@ -149,7 +149,7 @@ To make sure that GitLab Runner is operational:
 journalctl -u gitlab-runner
 ```
 
-<br><br>
+<br>
 
 Now we need to reconfigure GitLab Runner so that it will run jobs as a `root` user.
 
@@ -167,7 +167,7 @@ sudo sed -i 's/"--user" "gitlab-runner"/"--user" "root"/' /etc/systemd/system/gi
 >
 > Plus, this way we could allow our runner environment to use ECR much easier *(Take a look to `sudo` in front of every command)*, without files coping and permission management.
 
-<br><br><br>
+<br><br>
 
 #### Create Termination Sequence
 
@@ -218,10 +218,13 @@ Created symlink from /etc/systemd/system/shutdown.target.wants/ec2-terminate.ser
 
 #### Clean up
 
+I suggest to clean up an instance before creation of the AMI
+
 ```
-sudo userdel -r gitlab-runner
-docker rmi $(docker images -q)
-sudo yum clean all
+sudo userdel -r gitlab-runner \
+  && sudo docker rmi $(sudo docker images -q) \
+  && sudo yum clean all \
+  && rm -rf /var/cache/yum
 ```
 
 ## Create GitLab Runner AMI
