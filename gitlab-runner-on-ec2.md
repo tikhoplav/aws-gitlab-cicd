@@ -13,7 +13,9 @@ as well as to push this images to the ECR during CI/CD pipeline.
  - GitLab project;
  - AWS account;
  
- Current method can be applied to create specific project runner as well as group runner.
+Current method can be applied to create specific project runner as well as group runner.
+
+<br><br><br><br>
 
 ## Create GitLab Runner IAM Role
 
@@ -34,7 +36,11 @@ At this step we will create role that will be injected to EC2 instance. This rol
 
 The purpose of giving a GitLab runner full access to ECR is that give you an ability to delete repositories through CI/CD pipeline. For example, you could create a special job, that will unregister you microservice, clean up and set free all resources. If you feel that this permissions is more than you can allow runner to have, you could use `AmazonEC2ContainerRegistryPowerUser` policy instead.
 
+<br>
+
 Later, if you would like to grant more permissions to GitLab Runner instance, for example, to use **S3** to cache builds etc, you could add more policies to this [role](https://console.aws.amazon.com/iam/home#/roles/gitlab-runner). New permissions would automatically applied to all running instances using this role.
+
+<br><br><br><br>
 
 ## Create EC2 instance
 
@@ -60,7 +66,11 @@ At this step we will create a prototype EC2 instance. Later we will use this to 
 - `Launch`:
   - Here you will be asked to use existent or to create a new key pair. I suggest you to create special key pair for GitLab Runner prototype, but you could use one key pair for all of your future instances, or even use existent. It is ok, since access to working GitLab Runners will be restricted anyway.
 
+<br>
+
 After this you will see new ec2 instance in you instances console. For later steps we will have to establish SSH connection with prototype using `.pem` key file. For simplicity, let's say that the key is called `ec2.pem`. Make sure that `ec2.pem` file have permissions lower or equal to 600, otherwise SSH connection will fail.
+
+<br><br><br><br>
 
 ## Prepare EC2 instance
 
@@ -68,13 +78,15 @@ After this you will see new ec2 instance in you instances console. For later ste
 ```
 sudo yum -y update \
   && sudo amazon-linux-extras install -y docker \
-  && sudo service docker start \
-  && sudo usermod -aG docker $USER
+  && sudo systemctl enable docker \
+  && sudo service docker start
 ```
-Then we have to `exit` current session, to apply new `docker` group for ec2 user. After we reconnect, we can test that docker is running by executing:
+Now we can test that docker is running by executing:
 ```
-docker info
+sudo docker info
 ```
+
+<br><br><br>
 
 #### Esablish ECR connection
 
@@ -85,6 +97,8 @@ Before we can push and pull Docker images to ECR, we have to login our Docker da
 ```
 sudo yum install -y amazon-ecr-credential-helper
 ```
+
+<br><br>
 
 Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You could find that opening [ECR management console](https://console.aws.amazon.com/ecr/).
 
@@ -99,45 +113,113 @@ Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You
 >
 > The actual image we are using here is not important, later we will delete it from instance. Only thing is matter, is that this image have to be stored in the ECR you are plannig to use with CI/CD pipeline.
 
+<br><br>
+
 Now we need to aquire the token and store it with help of credential helper. To achive that we could use [this approach](https://github.com/awslabs/amazon-ecr-credential-helper/issues/63#issuecomment-328318116):
 
 ```
-$(aws ecr get-login --no-include-email --region $REGION) \
-  && echo -e "{\n\t\"credsStore\": \"ecr-login\"\n}" > ~/.docker/config.json \
-  && docker pull $IMAGE
+sudo $(aws ecr get-login --no-include-email --region $REGION) \
+  && echo -e "{\n\t\"credsStore\": \"ecr-login\"\n}" | sudo tee /root/.docker/config.json \
+  && sudo docker pull $IMAGE
 ```
+
+<br><br>
 
 After image is downloaded we can make sure that Docker login is cached, by running following command. The answer have to be similar:
 
 ```
-docker-credential-ecr-login list
+sudo docker-credential-ecr-login list
 {"https://678005261235.dkr.ecr.eu-central-1.amazonaws.com":"AWS"}
 ```
+<br><br><br>
 
+#### Install GitLab Runner
 
-
+According to official documentation, we can install GitLab Runner by doing:
 
 ```
-curl -LJO https://gitlab-runner-downloads.s3.amazonaws.com/latest/rpm/gitlab-runner_amd64.rpm
-sudo rpm -i gitlab-runner_amd64.rpm
-sudo usermod -aG docker gitlab-runner
-mv ~/.docker /home/gitlab-runner
-mv ~/.ecr /home/gitlab-runner
+curl -LJO https://gitlab-runner-downloads.s3.amazonaws.com/latest/rpm/gitlab-runner_amd64.rpm \
+  && sudo yum install -y git \
+  && sudo rpm -i gitlab-runner_amd64.rpm
+```
 
-echo -e "#!/bin/bash\ngitlab-runner unregister --all-runners" | sudo tee -a /etc/init.d/ec2-terminate.sh
-sudo chmod u+x /etc/init.d/ec2-terminate.sh
-echo -e '[Unit]
+To make sure that GitLab Runner is operational:
+
+```
+journalctl -u gitlab-runner
+```
+
+<br><br>
+
+Now we need to reconfigure GitLab Runner so that it will run jobs as a `root` user.
+
+```
+sudo sed -i 's/"--user" "gitlab-runner"/"--user" "root"/' /etc/systemd/system/gitlab-runner.service \
+  && sudo systemctl daemon-reload \
+  && sudo service gitlab-runner restart
+```
+
+> For what purpose do we need to run GitLab Runner as root?
+>
+> I have been testing with different settings of GitLab Runner. With current version of it (12.9.0) there are problems with POST requests to GitLab server so that you need to run `sudo gitlab-runner run` manually or with help of other tools (like `cloud-init`).
+>
+> Since it is highly suggested to use this kind of EC2 instances for hosting GitLab Runner only (Even all ports of it's security group should be disabled), there are the same security issues as if it will run as not a root.
+>
+> Plus, this way we could allow our runner environment to use ECR much easier *(Take a look to `sudo` in front of every command)*, without files coping and permission management.
+
+<br><br><br>
+
+#### Create Termination Sequence
+
+Later we will register runners to our projects using this prototype. We have to add some feature to our prototype, in order to unregister this runners automaticaly when instance is going to be terminated. Otherwise, we will have to detach runners from our projects manually *(What doesn't sounds great)*.
+
+To achive that we can use [this](https://www.golinuxcloud.com/run-script-with-systemd-before-shutdown-linux/) approach:
+
+```
+echo -e "#! /bin/bash\ngitlab-runner unregister --all-runners" | sudo tee /etc/init.d/ec2-terminate.sh \
+  && sudo chmod u+x /etc/init.d/ec2-terminate.sh
+```
+
+<br>
+
+Next, we will create a `systemd` service, that will run our script at system shutdown:
+
+```
+sudo vim /etc/systemd/system/ec2-terminate.service
+```
+
+With the following content *(`a` to edit file, `esc :x` to save our file and exit)*:
+
+```
+[Unit]
 Description=EC2 termination sequence
 DefaultDependencies=no
 Before=shutdown.target
-\n[Service]
+
+[Service]
 Type=oneshot
 ExecStart=/etc/init.d/ec2-terminate.sh
 TimeoutStartSec=0
-\n[Install]
-WantedBy=shutdown.target ' | sudo tee -a /etc/systemd/system/ec2-terminate.service
-sudo systemctl enable ec2-terminate.service
 
+[Install]
+WantedBy=shutdown.target
+```
+
+<br>
+
+Now let's register our new service:
+
+```
+sudo systemctl enable ec2-terminate.service
+Created symlink from /etc/systemd/system/shutdown.target.wants/ec2-terminate.service to /etc/systemd/system/ec2-terminate.service.
+```
+
+<br><br>
+
+#### Clean up
+
+```
+sudo userdel -r gitlab-runner
 docker rmi $(docker images -q)
 sudo yum clean all
 ```
