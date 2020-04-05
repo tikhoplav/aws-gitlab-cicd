@@ -15,7 +15,7 @@ as well as to push this images to the ECR during CI/CD pipeline.
  
  Current method can be applied to create specific project runner as well as group runner.
 
-## Create GitLab Runner IAM
+## Create GitLab Runner IAM Role
 
 At this step we will create role that will be injected to EC2 instance. This role identifies capabilities of our instance to use other AWS resources. For example, we will grant our GitLab Runner instance ability to push and pull Docker images to ECR.
 
@@ -64,22 +64,83 @@ After this you will see new ec2 instance in you instances console. For later ste
 
 ## Prepare EC2 instance
 
-After your new instance receive status `running`, you should be able to connect it via SSH. But before we need to figure out it's public ip address. This can be done by clicking our `proto gitlab-runner`, and search graph called `IPv4 Public IP` in the details.
-
-All of the following commands in this section should be executed at runner instance. To do so, next command can be used to establish SSH connection:
+#### Install Docker
 ```
-ssh -i <path to .pem file>/ec2.pem ec2-user@<proto gitlab-runner public ip>
+sudo yum -y update \
+  && sudo amazon-linux-extras install -y docker \
+  && sudo service docker start \
+  && sudo usermod -aG docker $USER
+```
+Then we have to `exit` current session, to apply new `docker` group for ec2 user. After we reconnect, we can test that docker is running by executing:
+```
+docker info
 ```
 
-### Install Docker
+#### Esablish ECR connection
 
-### Install Amazon-ECR-Credential-helper
+Before we can push and pull Docker images to ECR, we have to login our Docker daemon to ECR registry. Normally we aquire token that lasts 12 hours with `awc-cli`. In order to let GitLab Runner use ECR constantly we need to do the following steps:
 
-### Create permanent Docker ECR login
+[Amazon ECR Docker Credential Helper](https://github.com/awslabs/amazon-ecr-credential-helper) will allow EC2 instance push and pull images to ECR, since it requires special authentification sequence. Let's install it by running:
 
-### Install GitLab Runner
+```
+sudo yum install -y amazon-ecr-credential-helper
+```
 
-### Establish automatic unregister script on instance termination
+Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You could find that opening [ECR management console](https://console.aws.amazon.com/ecr/). For example if you repository looks like this:
+
+![ECR reposirory example](https://user-images.githubusercontent.com/62797411/78498843-837aa580-7755-11ea-834d-4d12ec2788cc.png)
+
+Then:
+
+```
+REGION=eu-central-1
+IMAGE=678005261235.dkr.ecr.eu-central-1.amazonaws.com/alpine:latest
+```
+
+The actual image we are using here is not important, later we will delete it from instance. Only thing is matter, is that this image have to be stored in the ECR you are plannig to use with CI/CD pipeline.
+
+Now we need to aquire the token and store it with help of credential helper. To achive that we could use [this approach](https://github.com/awslabs/amazon-ecr-credential-helper/issues/63#issuecomment-328318116):
+
+```
+$(aws ecr get-login --no-include-email --region $REGION) \
+  && echo -e "{\n\t\"credsStore\": \"ecr-login\"\n}" > ~/.docker/config.json \
+  && docker pull $IMAGE
+```
+
+After image is downloaded we can make sure that Docker login is cached, by running following command. The answer have to be similar:
+
+```
+docker-credential-ecr-login list
+{"https://678005261235.dkr.ecr.eu-central-1.amazonaws.com":"AWS"}
+```
+
+
+
+
+```
+curl -LJO https://gitlab-runner-downloads.s3.amazonaws.com/latest/rpm/gitlab-runner_amd64.rpm
+sudo rpm -i gitlab-runner_amd64.rpm
+sudo usermod -aG docker gitlab-runner
+mv ~/.docker /home/gitlab-runner
+mv ~/.ecr /home/gitlab-runner
+
+echo -e "#!/bin/bash\ngitlab-runner unregister --all-runners" | sudo tee -a /etc/init.d/ec2-terminate.sh
+sudo chmod u+x /etc/init.d/ec2-terminate.sh
+echo -e '[Unit]
+Description=EC2 termination sequence
+DefaultDependencies=no
+Before=shutdown.target
+\n[Service]
+Type=oneshot
+ExecStart=/etc/init.d/ec2-terminate.sh
+TimeoutStartSec=0
+\n[Install]
+WantedBy=shutdown.target ' | sudo tee -a /etc/systemd/system/ec2-terminate.service
+sudo systemctl enable ec2-terminate.service
+
+docker rmi $(docker images -q)
+sudo yum clean all
+```
 
 ## Create GitLab Runner AMI
 
