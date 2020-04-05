@@ -86,18 +86,18 @@ Before we can push and pull Docker images to ECR, we have to login our Docker da
 sudo yum install -y amazon-ecr-credential-helper
 ```
 
-Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You could find that opening [ECR management console](https://console.aws.amazon.com/ecr/). For example if you repository looks like this:
+Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You could find that opening [ECR management console](https://console.aws.amazon.com/ecr/).
 
-![ECR reposirory example](https://user-images.githubusercontent.com/62797411/78498843-837aa580-7755-11ea-834d-4d12ec2788cc.png)
-
-Then:
-
-```
-REGION=eu-central-1
-IMAGE=678005261235.dkr.ecr.eu-central-1.amazonaws.com/alpine:latest
-```
-
-The actual image we are using here is not important, later we will delete it from instance. Only thing is matter, is that this image have to be stored in the ECR you are plannig to use with CI/CD pipeline.
+> For example if you repository looks like this, you could set your variables as following:
+>
+> ![ECR reposirory example](https://user-images.githubusercontent.com/62797411/78498843-837aa580-7755-11ea-834d-4d12ec2788cc.png)
+>
+> ```
+> REGION=eu-central-1
+> IMAGE=678005261235.dkr.ecr.eu-central-1.amazonaws.com/alpine:latest
+> ```
+>
+> The actual image we are using here is not important, later we will delete it from instance. Only thing is matter, is that this image have to be stored in the ECR you are plannig to use with CI/CD pipeline.
 
 Now we need to aquire the token and store it with help of credential helper. To achive that we could use [this approach](https://github.com/awslabs/amazon-ecr-credential-helper/issues/63#issuecomment-328318116):
 
