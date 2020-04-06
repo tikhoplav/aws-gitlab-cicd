@@ -28,10 +28,11 @@ $ $(aws ecr get-login --no-include-email)
 
 <br>
 
-Next we need to create new repository by running *(Copy value of the `repositoryUri` field, as it is needed in the next step)*:
+Next we need to create new repository by running *(Copy value of the `repositoryUri` field to clipboard, as it is required in the next step)*:
 
 ```
 $ aws ecr create-repository --repository-name nginx
+
 {
     "repository": {
         "repositoryUri": "678005261235.dkr.ecr.eu-central-1.amazonaws.com/nginx", 
