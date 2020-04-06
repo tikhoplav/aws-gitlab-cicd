@@ -104,7 +104,7 @@ Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You
 
 > For example if you repository looks like this, you could set your variables as following:
 >
-> ![ECR reposirory example](https://user-images.githubusercontent.com/62797411/78498843-837aa580-7755-11ea-834d-4d12ec2788cc.png)
+> ![ECR repository example](https://user-images.githubusercontent.com/62797411/78579678-f65d4c80-7839-11ea-8096-93fed83b6673.png)
 >
 > ```
 > REGION=eu-central-1
@@ -245,7 +245,7 @@ Before we register our runner and let it take and execute jobs for our pipeline,
 
 After, you will be able to see new AMI in [images management console](https://console.aws.amazon.com/ec2/v2/home?#Images:sort=name). Time required to set image `ready` depends on the used hardware space do our instance. With 8 Gb SSD it requires several minutes.
 
-![AMI example](https://user-images.githubusercontent.com/62797411/78563512-c3a85980-7823-11ea-849e-dcf34f81eee6.png)
+![New AMI example](https://user-images.githubusercontent.com/62797411/78580235-c8c4d300-783a-11ea-9c00-5dc6fc43a6e0.png)
 
 > In the description I have mentioned versions of software that we have installed. This versions may differs with yours. To get versions of Docker and GitLab Runner you can run next command:
 > ```
@@ -255,7 +255,7 @@ After, you will be able to see new AMI in [images management console](https://co
 
 <br><br><br>
 
-## Test Runner
+## Instantiate GitLab Runner using AMI
 
 Since our AMI is ready, we could now run new instance and configure it's startup so that GitLab Runner will register itself to our project. But before that let's configre our project and aquire registration token and url for the runner registration:
 
@@ -283,7 +283,7 @@ Now it is time to lunch new runner using AMI that we have created:
 - `Launch instance`:
   - Choose an Amazon Machine Image - select `GitLab Runner`, inside `My AMIs` tab;
   
-  ![Select GitLab Runner AMI](https://user-images.githubusercontent.com/62797411/78565822-17687200-7827-11ea-82fd-07068171e131.png)
+  ![Select gitlab runner AMI](https://user-images.githubusercontent.com/62797411/78579253-543d6480-7839-11ea-859e-ef79a58142e3.png)
   
   - Choose an Instance Type - select `t2.micro` *(make sure that free tier is available)*;
   
@@ -318,7 +318,7 @@ Now it is time to lunch new runner using AMI that we have created:
     --//
     ```
     
-    ![User-Data section](https://user-images.githubusercontent.com/62797411/78566204-8f369c80-7827-11ea-9202-d487b7f402fd.png)
+    ![User-Data settings](https://user-images.githubusercontent.com/62797411/78579109-1d674e80-7839-11ea-9b3d-6454f8a1944d.png)
     
   - Leave everything else by default;
   
@@ -338,3 +338,38 @@ Now it is time to lunch new runner using AMI that we have created:
 
 - `Launch`:
   - Select `Proceed without any key`.
+
+<br>
+
+After new instance is operational, we need to wait a little more to let it initiate runner and register it to our project. You could see that new runner is connect in projects CI/CD settings, runner section:
+
+![Runner is registered successfully](https://user-images.githubusercontent.com/62797411/78578907-d6795900-7838-11ea-9937-dc176d7e7db8.png)
+
+<br><br><br>
+
+## Test runner
+
+Now it is time to test our new runner. To do that let's create a pipeline in our project by adding a new file to the root of our project, called `.gitlab-ci.yml`. But before we neew to aquire a name of the image, exactly the same as have used in preparation stage.
+
+Let's say that our image called: `678005261235.dkr.ecr.eu-central-1.amazonaws.com/alpine:latest`. Then our `.gitlab-ci.yml` will look like this:
+
+```
+test:
+  script:
+    - docker pull 678005261235.dkr.ecr.eu-central-1.amazonaws.com/alpine:latest
+    - docker rmi $(docker images -q)
+```
+
+Yes, thats all we need. By running docker command, we ensure that GitLab Runner configured proper way. By pulling image from ECR we test our ECR connection.
+
+<br>
+
+If everything is set up correctly, we will find our job in Project > CI/CD > Jobs with status passed:
+
+![Successful job with EC2 runner](https://user-images.githubusercontent.com/62797411/78578762-9e721600-7838-11ea-8420-a74de9e950b3.png)
+
+If you now terminate your `gitlab-runner` EC2 instance, you will see that the runner have been automatically uregistered in your Project > Settings > CI/CD > Runners.
+
+---
+
+Congratulations! You have created and tested your new GitLab Runner AMI, with help of which you can now create as many runners as you need.
