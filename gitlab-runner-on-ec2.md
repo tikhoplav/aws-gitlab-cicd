@@ -52,7 +52,7 @@ At this step we will create a prototype EC2 instance. Later we will use this to 
   - Choose an Instance Type - select `t2.micro` *(make sure that free tier is available)*;
 - `Next: Configure Instance Details`:
   - Auto-assign Public IP - `Enable` *(or `Use subnet settings (Enable)`)*;
-  - IAM role - select `gitlab-runner`;
+  - IAM role - select `gitlab-runner` [that we created earlier](https://github.com/tikhoplav/AWS-Gitlab-CICD/blob/master/gitlab-runner-on-ec2.md#create-gitlab-runner-iam-role);
   - Leave everything else by default;
 - `Next: Add Storage`:
 - `Next: Add Tags`:
@@ -218,7 +218,7 @@ Created symlink from /etc/systemd/system/shutdown.target.wants/ec2-terminate.ser
 
 #### Clean up
 
-I suggest to clean up an instance before creation of the AMI
+I suggest to clean up an instance before creation of the AMI, since free tier of ESB volume usage is limited, or if you not using free tier or broke the limit of monthly usage, every single megabyte is charged.
 
 ```
 sudo userdel -r gitlab-runner \
@@ -227,8 +227,14 @@ sudo userdel -r gitlab-runner \
   && rm -rf /var/cache/yum
 ```
 
+<br><br><br>
+
 ## Create GitLab Runner AMI
 
-## Lunch GitLab Runner EC2 instance
+Before we register our runner and let it take and execute jobs for our pipeline, I highly suggest to create special GitLab Runner AMI. Using this we will minimize time consumtion that is required to set new runner operational, since we will not have to repeat all the actions given in [preparation section](https://github.com/tikhoplav/AWS-Gitlab-CICD/blob/master/gitlab-runner-on-ec2.md#prepare-ec2-instance).
+
+- Go to [instance management console](https://console.aws.amazon.com/ec2/v2/home?#Instances:sort=desc:launchTime);
+- Find one with name `proto gitlab-runner` (that one, that we have created and prepared earlier);
+- `Action` > `Image` > `Create Image`:
 
 ## Test Runner
