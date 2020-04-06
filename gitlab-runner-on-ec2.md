@@ -76,14 +76,14 @@ After this you will see new ec2 instance in you instances console. For later ste
 
 #### Install Docker
 ```
-sudo yum -y update \
+$ sudo yum -y update \
   && sudo amazon-linux-extras install -y docker \
   && sudo systemctl enable docker \
   && sudo service docker start
 ```
 Now we can test that docker is running by executing:
 ```
-sudo docker info
+$ sudo docker info
 ```
 
 <br><br>
@@ -95,7 +95,7 @@ Before we can push and pull Docker images to ECR, we have to login our Docker da
 [Amazon ECR Docker Credential Helper](https://github.com/awslabs/amazon-ecr-credential-helper) will allow EC2 instance push and pull images to ECR, since it requires special authentification sequence. Let's install it by running:
 
 ```
-sudo yum install -y amazon-ecr-credential-helper
+$ sudo yum install -y amazon-ecr-credential-helper
 ```
 
 <br>
@@ -118,7 +118,7 @@ Next we need to specify `$IMAGE` and `$REGION`is the parameters of your ECR. You
 Now we need to aquire the token and store it with help of credential helper. To achive that we could use [this approach](https://github.com/awslabs/amazon-ecr-credential-helper/issues/63#issuecomment-328318116):
 
 ```
-sudo $(aws ecr get-login --no-include-email --region $REGION) \
+$ sudo $(aws ecr get-login --no-include-email --region $REGION) \
   && echo -e "{\n\t\"credsStore\": \"ecr-login\"\n}" | sudo tee /root/.docker/config.json \
   && sudo docker pull $IMAGE
 ```
@@ -128,7 +128,7 @@ sudo $(aws ecr get-login --no-include-email --region $REGION) \
 After image is downloaded we can make sure that Docker login is cached, by running following command. The answer have to be similar:
 
 ```
-sudo docker-credential-ecr-login list
+$ sudo docker-credential-ecr-login list
 {"https://678005261235.dkr.ecr.eu-central-1.amazonaws.com":"AWS"}
 ```
 <br><br>
@@ -138,7 +138,7 @@ sudo docker-credential-ecr-login list
 According to official documentation, we can install GitLab Runner by doing:
 
 ```
-curl -LJO https://gitlab-runner-downloads.s3.amazonaws.com/latest/rpm/gitlab-runner_amd64.rpm \
+$ curl -LJO https://gitlab-runner-downloads.s3.amazonaws.com/latest/rpm/gitlab-runner_amd64.rpm \
   && sudo yum install -y git \
   && sudo rpm -i gitlab-runner_amd64.rpm
 ```
@@ -146,7 +146,7 @@ curl -LJO https://gitlab-runner-downloads.s3.amazonaws.com/latest/rpm/gitlab-run
 To make sure that GitLab Runner is operational:
 
 ```
-journalctl -u gitlab-runner
+$ journalctl -u gitlab-runner
 ```
 
 <br>
@@ -154,7 +154,7 @@ journalctl -u gitlab-runner
 Now we need to reconfigure GitLab Runner so that it will run jobs as a `root` user.
 
 ```
-sudo sed -i 's/"--user" "gitlab-runner"/"--user" "root"/' /etc/systemd/system/gitlab-runner.service \
+$ sudo sed -i 's/"--user" "gitlab-runner"/"--user" "root"/' /etc/systemd/system/gitlab-runner.service \
   && sudo systemctl daemon-reload \
   && sudo service gitlab-runner restart
 ```
@@ -176,7 +176,7 @@ Later we will register runners to our projects using this prototype. We have to 
 To achive that we can use [this](https://www.golinuxcloud.com/run-script-with-systemd-before-shutdown-linux/) approach:
 
 ```
-echo -e "#! /bin/bash\ngitlab-runner unregister --all-runners" | sudo tee /etc/init.d/ec2-terminate.sh \
+$ echo -e "#! /bin/bash\ngitlab-runner unregister --all-runners" | sudo tee /etc/init.d/ec2-terminate.sh \
   && sudo chmod u+x /etc/init.d/ec2-terminate.sh
 ```
 
@@ -185,7 +185,7 @@ echo -e "#! /bin/bash\ngitlab-runner unregister --all-runners" | sudo tee /etc/i
 Next, we will create a `systemd` service, that will run our script at system shutdown:
 
 ```
-sudo vim /etc/systemd/system/ec2-terminate.service
+$ sudo vim /etc/systemd/system/ec2-terminate.service
 ```
 
 With the following content *(`a` to edit file, `esc :x` to save our file and exit)*:
@@ -210,7 +210,7 @@ WantedBy=shutdown.target
 Now let's register our new service:
 
 ```
-sudo systemctl enable ec2-terminate.service
+$ sudo systemctl enable ec2-terminate.service
 Created symlink from /etc/systemd/system/shutdown.target.wants/ec2-terminate.service to /etc/systemd/system/ec2-terminate.service.
 ```
 
@@ -221,7 +221,7 @@ Created symlink from /etc/systemd/system/shutdown.target.wants/ec2-terminate.ser
 I suggest to clean up an instance before creation of the AMI, since free tier of ESB volume usage is limited, or if you not using free tier or broke the limit of monthly usage, every single megabyte is charged.
 
 ```
-sudo userdel -r gitlab-runner \
+$ sudo userdel -r gitlab-runner \
   && sudo docker rmi $(sudo docker images -q) \
   && sudo yum clean all \
   && rm -rf /var/cache/yum
