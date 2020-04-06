@@ -12,7 +12,7 @@ Current method can be applied to create specific project runner as well as group
 
 - GitLab project;
 
-- [Admin priveleged account](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/aws-admin-iam.md) with `AWS Management Console access`;
+- [Admin privileged account](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/aws-admin-iam.md) with `AWS Management Console access`;
 
 - [SSH key pair](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/aws-ssh-key-pair.md);
 
