@@ -155,6 +155,7 @@ Now we need to reconfigure GitLab Runner so that it will run jobs as a `root` us
 
 ```
 $ sudo sed -i 's/"--user" "gitlab-runner"/"--user" "root"/' /etc/systemd/system/gitlab-runner.service \
+  && sudo sed -i 's/"/home/gitlab-runner"/"/tmp"/' /etc/systemd/system/gitlab-runner.service
   && sudo systemctl daemon-reload \
   && sudo service gitlab-runner restart
 ```
@@ -244,6 +245,8 @@ Before we register our runner and let it take and execute jobs for our pipeline,
 
 After, you will be able to see new AMI in [images management console](https://console.aws.amazon.com/ec2/v2/home?#Images:sort=name). Time required to set image `ready` depends on the used hardware space do our instance. With 8 Gb SSD it requires several minutes.
 
+![AMI example](https://user-images.githubusercontent.com/62797411/78563512-c3a85980-7823-11ea-849e-dcf34f81eee6.png)
+
 > In the description I have mentioned versions of software that we have installed. This versions may differs with yours. To get versions of Docker and GitLab Runner you can run next command:
 > ```
 > $ sudo docker info | grep "Server Version"
@@ -253,3 +256,85 @@ After, you will be able to see new AMI in [images management console](https://co
 <br><br><br>
 
 ## Test Runner
+
+Since our AMI is ready, we could now run new instance and configure it's startup so that GitLab Runner will register itself to our project. But before that let's configre our project and aquire registration token and url for the runner registration:
+
+- Go to your GitLab project setting > CI/CD > Runners *(If you are planning to make group runner go to your group settings > CI/CD > Runners)*;
+- Disable shared runner by clicking `disable shared runners` button;
+- Find `URL` to register new runner;
+- Find `Registration token` to register new runner.
+
+![GitLab Runner settings](https://user-images.githubusercontent.com/62797411/78564461-21897100-7825-11ea-8926-6e89d3b1f9be.png)
+
+> Why do we disable shared runners?
+>
+> At first, using shared runners makes your data vulnerable. More info about it you can find [here](https://stackoverflow.com/questions/35527655/what-are-the-security-risks-of-using-gitlab-ci-shared-test-runners) and [here](https://gitlab.com/gitlab-org/gitlab-runner/issues/4430).
+>
+> At second, shared runner are shared between all users of the GitLab CI/CD pipelines. That means that you will have to wait until shared runner gets free to run your jobs.
+>
+> Ofcourse, you can choose which runner will get your job by using runner tags and leave shared runners enabled, for example, to save EC2 computing time. But you have to manage your risks on your own.
+
+<br>
+
+Now it is time to lunch new runner using AMI that we have created:
+
+- Go to [instances management console](https://console.aws.amazon.com/ec2/v2/home?#Instances);
+
+- `Launch instance`:
+  - Choose an Amazon Machine Image - select `GitLab Runner`, inside `My AMIs` tab;
+  
+  ![Select GitLab Runner AMI](https://user-images.githubusercontent.com/62797411/78565822-17687200-7827-11ea-82fd-07068171e131.png)
+  
+  - Choose an Instance Type - select `t2.micro` *(make sure that free tier is available)*;
+  
+- `Next: Configure Instance Details`:
+  - Auto-assign Public IP - `Enable` *(or `Use subnet settings (Enable)`)*;
+  - IAM role - select `gitlab-runner` [that we created earlier](https://github.com/tikhoplav/AWS-Gitlab-CICD/blob/master/gitlab-runner-on-ec2.md#create-gitlab-runner-iam-role);
+  - Go to Advanced Details section:
+    - User-data - set `As text` and paste next text to the field:
+    
+    ```
+    Content-Type: multipart/mixed; boundary="//"
+    MIME-Version: 1.0
+
+    --//
+    Content-Type: text/cloud-config; charset="us-ascii"
+    MIME-Version: 1.0
+    Content-Transfer-Encoding: 7bit
+    Content-Disposition: attachment; filename="cloud-config.txt"
+
+    #cloud-config
+    cloud_final_modules:
+    - [scripts-user, always]
+
+    --//
+    Content-Type: text/x-shellscript; charset="us-ascii"
+    MIME-Version: 1.0
+    Content-Transfer-Encoding: 7bit
+    Content-Disposition: attachment; filename="userdata.txt"
+
+    #! /bin/bash
+    sudo gitlab-runner register -n --url <Your URL> --registration-token <Your Registartion Token> --executor shell --description "EC2 runner"
+    --//
+    ```
+    
+    ![User-Data section](https://user-images.githubusercontent.com/62797411/78566204-8f369c80-7827-11ea-9202-d487b7f402fd.png)
+    
+  - Leave everything else by default;
+  
+- `Next: Add Storage`:
+
+- `Next: Add Tags`:
+  - `Name` - `gitlab-runner`;
+  - `Project` - paste url of your GitLab project or group;
+  
+- `Next: Configure Security Group`:
+  - Select `Create a new security group`;
+  - Security group name - `gitlab-runner`;
+  - Description - `Disallow any incoming connections`;
+  - Remove any rulle from the list;
+  
+- `Next: Review and Launch`;
+
+- `Launch`:
+  - Select `Proceed without any key`.
