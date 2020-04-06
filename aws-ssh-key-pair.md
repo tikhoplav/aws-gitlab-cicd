@@ -34,7 +34,7 @@ Also, make sure that SSH connection *(TCP on port 22)* is allowed in instance se
 
 ![ec2 instance inbound rules](https://user-images.githubusercontent.com/62797411/78601575-aee8b780-785d-11ea-8d77-189cd4531e28.png)
 
-![ec2 instance inbound rules list](https://user-images.githubusercontent.com/62797411/78601631-c4f67800-785d-11ea-978d-c440b4fa67fc.png)
+![ec2 instance inbound rules list](https://user-images.githubusercontent.com/62797411/78607429-b44aff80-7867-11ea-91a1-d900204de120.png)
 
 <br>
 
