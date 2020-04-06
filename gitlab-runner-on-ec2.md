@@ -224,7 +224,7 @@ I suggest to clean up an instance before creation of the AMI, since free tier of
 $ sudo userdel -r gitlab-runner \
   && sudo docker rmi $(sudo docker images -q) \
   && sudo yum clean all \
-  && rm -rf /var/cache/yum
+  && sudo rm -rf /var/cache/yum
 ```
 
 <br><br><br>
