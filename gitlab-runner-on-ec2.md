@@ -236,5 +236,20 @@ Before we register our runner and let it take and execute jobs for our pipeline,
 - Go to [instance management console](https://console.aws.amazon.com/ec2/v2/home?#Instances:sort=desc:launchTime);
 - Find one with name `proto gitlab-runner` (that one, that we have created and prepared earlier);
 - `Action` > `Image` > `Create Image`:
+  - Image name - `GitLab Runner`;
+  - Image descriotion - `Amazon Linux 2 based. Contains Docker (v19.03.6), Amazon ECR Docker Credentials Helper, GitLab Runner (v12.9.0)`;
+- `Create Image`.
+
+<br>
+
+After, you will be able to see new AMI in [images management console](https://console.aws.amazon.com/ec2/v2/home?#Images:sort=name). Time required to set image `ready` depends on the used hardware space do our instance. With 8 Gb SSD it requires several minutes.
+
+> In the description I have mentioned versions of software that we have installed. This versions may differs with yours. To get versions of Docker and GitLab Runner you can run next command:
+> ```
+> $ sudo docker info | grep "Server Version"
+> $ sudo gitlab-runner --version | grep "Version"
+> ```
+
+<br><br><br>
 
 ## Test Runner
