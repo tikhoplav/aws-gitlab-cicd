@@ -128,6 +128,6 @@ Congratulations! You have created GitLab Runner Auto Scaling group. May be you w
 
 - [Configure GitLab CI/CD](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-cicd.md);
 
-- [Configure Swarm Cluster with EC2 instances](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster.md);
+- [Creation of the Docker Swarm Cluster on EC2 instances](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-ec2.md);
 
 - [Back to the main page](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/README.md).
