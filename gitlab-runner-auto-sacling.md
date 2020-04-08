@@ -116,6 +116,18 @@ Since Launch Configuration is successfully created, choose `Create an Auto Scali
 
 ![Create GitLab Runner Auto Scaling Group](https://user-images.githubusercontent.com/62797411/78757821-c622c480-7985-11ea-854f-fcd208168f48.png)
 
-<br><br>
+<br>
 
-## Test GitLab Runner Auto Scaling Group
+Once the Auto Scale group initialized, you will see three new runners registered in your projects Settings > CI/CD > Runners:
+
+![GitLab Runner Auto Scale group complete](https://user-images.githubusercontent.com/62797411/78760817-5a8f2600-798a-11ea-8626-38671c3fa67f.png)
+
+--- 
+
+Congratulations! You have created GitLab Runner Auto Scaling group. May be you will find following links interesting: 
+
+- [Configure GitLab CI/CD](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-cicd.md);
+
+- [Configure Swarm Cluster with EC2 instances](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster.md);
+
+- [Back to the main page](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/README.md).
