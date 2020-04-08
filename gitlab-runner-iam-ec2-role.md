@@ -12,21 +12,21 @@ At this page we will create role that will be used by EC2 instance. This role id
 
   ![EC2 role creation](https://user-images.githubusercontent.com/62797411/78597675-a2ad2c00-7856-11ea-9b48-54579d6a854c.png)
 
-- `Next: Permissions`;
+	- `Next: Permissions`;
 
-  - Attach permissions policies - paste `EC2Container` to the search bar and select *(checkbox)* `AmazonEC2ContainerRegistryFullAccess`;
+	  - Attach permissions policies - paste `EC2Container` to the search bar and select *(checkbox)* `AmazonEC2ContainerRegistryFullAccess`;
 
-- `Next: Tags`;
+	- `Next: Tags`;
 
-  - *(Optional)* Here you can add key-value pairs to identify role in the list. I suggest to set tag `Name` with value `gitlab-runner`;
+	  - *(Optional)* Here you can add key-value pairs to identify role in the list. I suggest to set tag `Name` with value `gitlab-runner`;
 
-- `Next: Review`;
+	- `Next: Review`;
 
-  - Role name - Clear names related to use cases highly suggested, for example `gitlab-runner`;
+	  - Role name - Clear names related to use cases highly suggested, for example `gitlab-runner`;
 
-  - Role description *(Optional)* - `Allows EC2 instance to pull and push Docker images to ECR`;
+	  - Role description *(Optional)* - `Allows EC2 instance to pull and push Docker images to ECR`;
 
-- `Create role`.
+	- `Create role`.
 
 > The purpose of giving a GitLab runner full access to ECR is that give you an ability to delete repositories through CI/CD pipeline. For example, you could create a special job, that will unregister you microservice, clean up and set free all resources.
 >

@@ -6,6 +6,12 @@ On this page we will create GitLab Runner AMI in order to minimize time required
 
 - [Configured EC2 instance to host GitLab Runner](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md).
 
+- [gitlab-runner IAM EC2 role](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-iam-ec2-role.md);
+
+- [Admin privileged account](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/aws-admin-iam.md) with `AWS Management Console access`;
+
+- GitLab project.
+
 <br>
 
 - Go to [instance management console](https://console.aws.amazon.com/ec2/v2/home?#Instances:sort=desc:launchTime);
@@ -18,7 +24,7 @@ On this page we will create GitLab Runner AMI in order to minimize time required
 
   - Image descriotion - `Amazon Linux 2 based. Contains Docker (v19.03.6), Amazon ECR Docker Credentials Helper, GitLab Runner (v12.9.0)`;
 
-- `Create Image`.
+  - `Create Image`.
 
 <br>
 
@@ -59,41 +65,47 @@ Now it is time to lunch new runner using AMI that we have created:
   
   - Choose an Instance Type - select `t2.micro` *(make sure that free tier is available)*;
   
-- `Next: Configure Instance Details`:
+  - `Next: Configure Instance Details`:
 
-  - Auto-assign Public IP - `Enable` *(or `Use subnet settings (Enable)`)*;
+    - Auto-assign Public IP - `Enable` *(or `Use subnet settings (Enable)`)*;
 
-  - IAM role - select `gitlab-runner` *(if you haven't got this role, create one using [this](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-iam-ec2-role.md))*;
+    - IAM role - select `gitlab-runner` *(if you haven't got this role, create one using [this](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-iam-ec2-role.md))*;
 
-  - Go to Advanced Details section:
+    - Go to Advanced Details section:
 
-    - User-data - set `As filetext` and select `gitlab-runner_user-data.txt`;
+      - User-data - set `As filetext` and select `gitlab-runner_user-data.txt`;
+      
+    - Leave everything else by default;
     
-  - Leave everything else by default;
-  
-- `Next: Add Storage`:
+  - `Next: Add Storage`:
 
-- `Next: Add Tags`:
+  - `Next: Add Tags`:
 
-  - `Name` - `gitlab-runner`;
+    - `Name` - `gitlab-runner`;
 
-  - `Project` - paste url of your GitLab project or group *(That will help you separate runners for different projects later)*;
-  
-- `Next: Configure Security Group`:
+    - `Project` - paste url of your GitLab project or group *(That will help you separate runners for different projects later)*;
+    
+  - `Next: Configure Security Group`:
 
-  - Select `Create a new security group`;
+    - Select `Create a new security group`;
 
-  - Security group name - `gitlab-runner`;
+    - Security group name - `gitlab-runner`;
 
-  - Description - `Disallow any incoming connections`;
+    - Description - `Disallow any incoming connections`;
 
-  - Remove any rule from the list;
-  
-- `Next: Review and Launch`;
+    - Remove any rule from the list;
+    
+  - `Next: Review and Launch`;
 
-- `Launch`:
+  - `Launch`:
 
-  - Select `Proceed without any key`.
+    - Select `Proceed without any key`.
+
+<br>
+
+As new EC2 reach `running` status you will see new runner connected to the projects Settings > CI/CD > Runners section:
+
+![connected gitlab runner](https://user-images.githubusercontent.com/62797411/78612507-2fb1ae80-7872-11ea-841c-fc821188f522.png)
 
 ---
 
