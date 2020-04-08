@@ -122,12 +122,4 @@ Once the Auto Scale group initialized, you will see three new runners registered
 
 ![GitLab Runner Auto Scale group complete](https://user-images.githubusercontent.com/62797411/78760817-5a8f2600-798a-11ea-8626-38671c3fa67f.png)
 
---- 
-
-Congratulations! You have created GitLab Runner Auto Scaling group. May be you will find following links interesting: 
-
-- [Configure GitLab CI/CD](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-cicd.md);
-
-- [Creation of the Docker Swarm Cluster on EC2 instances](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-ec2.md);
-
-- [Back to the main page](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/README.md).
+---

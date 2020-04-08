@@ -372,9 +372,3 @@ After a little you will see new runner connected in the same projects Settings >
 ![connected gitlab runner](https://user-images.githubusercontent.com/62797411/78612507-2fb1ae80-7872-11ea-841c-fc821188f522.png)
 
 ---
-
-Congratulations! You have lunched GitLab Runner using EC2 instance. I suggest you to go through the next steps:
-
-- [GitLab Runner AMI Creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-ami.md) - To minimize time consumption of new runners launch;
-
-- [GitLab Runner Auto Scaling Group Creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-auto-scaling.md) - To launch new runners for your project automatically on heavy CI/CD pipeline load.

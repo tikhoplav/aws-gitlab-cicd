@@ -108,7 +108,3 @@ As new EC2 reach `running` status you will see new runner connected to the proje
 ![connected gitlab runner](https://user-images.githubusercontent.com/62797411/78612507-2fb1ae80-7872-11ea-841c-fc821188f522.png)
 
 ---
-
-Congratulations! You have created GitLab Runner AMI. I suggest you to go through the next step:
-
-- [GitLab Runner Auto Scaling Group Creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-auto-scaling.md) - To launch new runners for your project automatically on heavy CI/CD pipeline load.

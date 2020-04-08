@@ -135,11 +135,3 @@ Select the corresponding route table and `Actions > Edit routes`. Here we need t
 ![Swarm cluster on ec2 internet gateway attachment](https://user-images.githubusercontent.com/62797411/78779075-ffb6f800-79a4-11ea-9398-f31c2c98c308.png)
 
 ---
-
-Congratulations! You have configured network, vital for creation of the Docker Swarm cluser on EC2 isntances. May be you will find following links interesting:
-
-- [Creation of the Docker Swarm Cluster on EC2 instances](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-ec2.md);
-
-- [Creation of the EC2 iam role for Docker Swarm worker](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-iam-ec2-role.md);
-
-- [Docker Swarm cluster on EC2 VPC modification for RDS database connection](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-database.md#vpc-modification);
