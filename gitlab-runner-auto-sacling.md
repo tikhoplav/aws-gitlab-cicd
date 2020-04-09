@@ -2,7 +2,7 @@
 
 On this page we will create and configure AWS Auto Scaling Group with our GitLab Runner. The purpose of this is to launch new runner when your pipeline requires more runners. Since we are running `shell` executor the only way to scale our runners is to multiply EC2 instances hosting runners. That's the main purpose to use low memory EC2 types, as one `shell` runner could do only one job at a time.
 
-**Requirements**:
+**Requirements:**
 
 - [GitLab Runner AMI](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-ami.md);
 

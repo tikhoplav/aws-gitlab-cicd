@@ -1,4 +1,4 @@
-# Configure amazon EC2 instance for GitLab Runner
+# Configure Amazon EC2 instance for GitLab Runner
 
 In this guide we will lunch and set up **Amazon Web Service EC2 instance** to host **GitLab Runner**.
 
@@ -8,7 +8,7 @@ Current method can be applied to create specific project runner as well as group
 
 <br>
 
-**Requirements**:
+**Requirements:**
 
 - [Admin privileged account](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/aws-admin-iam.md) with `AWS Management Console access`;
 

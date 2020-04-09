@@ -2,7 +2,7 @@
 
 In the page we will go through the process of **Amazon Web Service** network creation and configuration. We will create special **Virtual Private Network** (**VPC**) to allow docker containers talk to each other while beinig part of **Docker Swarm** and receiving incomming connections on public ports.
 
-**Requirements**:
+**Requirements:**
 
 - [Admin privileged account](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/aws-admin-iam.md) with `AWS Management Console access`;
 
