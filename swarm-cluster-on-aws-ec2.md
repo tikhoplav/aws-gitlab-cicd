@@ -1,3 +1,5 @@
+<br>
+
 # How to organize Docker Swarm cluster on AWS EC2 instances in Auto Scaling Group
 
 Greetings, reader. In this tutorial we will create a **Docker Swarm** cluster of **Amazon Web Service** **EC2** instances as a nodes. We will start from scratch, configuring AWS network, creating special **AMI** and **Auto Scaling Group** to make a fully autonomous cluster that scales it self in order to meet swarm resource requirements.
@@ -18,13 +20,13 @@ In order to reproduce steps of this tutorial we will need followings:
 
 This section contains basic steps that you should perform before any actual work with AWS, such as:
 
-- [Administrator IAM creation]();
+- [Administrator IAM creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#11-administrator-iam-creation);
 
-- [SSH Key Pair creation]();
+- [SSH Key Pair creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#12-ssh-key-pair-creation);
 
-- [AWS CLI configuration]();
+- [AWS CLI configuration](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#13-aws-cli-configuration);
 
-- [ECR Repository creation]();
+- [ECR Repository creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#14-ecr-repository-creation).
 
 <br>
 
@@ -200,15 +202,15 @@ Also, you could find your new image in [ECR management console > repositories](h
 
 In this section we will create all necessary aws networking resources, such as:
 
-- [VPC]();
+- [VPC](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#21-vpc-creation);
 
-- [Internet Gateway]();
+- [Internet Gateway](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#22-internet-gateway-creation);
 
-- [Security Group]();
+- [Security Group](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#23-security-group-creation);
 
-- [Subnet]();
+- [Subnet](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#24-subnet-creation);
 
-- [Route Table]();
+- [Route Table](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#25-route-table-configuration).
 
 For the sake of clarity we will create cluster called `production` as an example. Any resources names and tags will be set related to the `production`, so that you will be able to recognize this resources later.
 
@@ -390,7 +392,15 @@ $ aws ec2 create-route \
 
 ## 3. Swarm node EC2 AMI creation
 
-In this section we will create special **AMI** (**Amazon Machine Image**) that serves as a preset of our future Docker Swarm nodes. Later we will use this AMI to configure **Auto Scaling Group**, that will regulate number of EC2 instances automatically.
+In this section we will create special **AMI** (**Amazon Machine Image**) that serves as a preset of our future Docker Swarm nodes. Later we will use this AMI to configure **Auto Scaling Group**, that will regulate number of EC2 instances automatically. THe following steps will be covered:
+
+- [Swarm node EC2 role creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#31-swarm-node-ec2-role-creation);
+
+- [EC2 instance launch](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#32-launch-ec2-instance);
+
+- [EC2 instance configuration](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#33-ec2-instance-configuration);
+
+- [Docker Swarm node EC2 AMI creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#34-docker-swarm-node-ec2-ami-creation).
 
 <br>
 
@@ -859,7 +869,17 @@ $ aws ec2 create-tags --resources ami-0901c7867b6172373 --tags Key=Name,Value=sw
 
 ## 4. Docker Swarm EC2 cluster configuration
 
-In this section we will finally launch our cluster as an **Auto Scaling** group with use of AMI created earlier.
+In this section we will finally launch our cluster as an **Auto Scaling** group with use of AMI created earlier. Next steps will be covered:
+
+- [Docker Swarm initialization](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#41-docker-swarm-initialization);
+
+- [Swarm node EC2 launch configuration creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#42-swarm-node-ec2-launch-configuration-creation);
+
+- [Swarm cluster AWS Auto Scaling Group creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#43-swarm-cluster-aws-auto-scaling-group-creation);
+
+- [Docker Swarm cluster on EC2 instances testing](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#44-docker-swarm-cluster-on-ec2-instances-testing);
+
+- [Auto Scaling policy attachment](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md#45-auto-scaling-policy-attachment).
 
 <details>
 <summary>Env var required</summary>
@@ -1106,7 +1126,7 @@ $ aws ec2 describe-instances \
 
 <br>
 
-### 4.5 Docker Swarm cluster on EC2 instances testing
+### 4.4 Docker Swarm cluster on EC2 instances testing
 
 It is time to test that our new cluster is working properly. For this purpose I have prepared two docker images available at DockerHub. Let's start couple of services in our swarm *(Make SSH connection to `production-manager` and run following commands)*. But before let's check our node list:
 
@@ -1192,7 +1212,7 @@ Try to run this multiple times and see how Docker Swarm integrated load balancer
 
 <br>
 
-### 4.6 Auto Scaling policy attachment
+### 4.5 Auto Scaling policy attachment
 
 To make our cluster fully autonomous, we need to add feedback to our auto-scaling group. The following command creates a scaling policy and attaches it to our auto-scaling group. What he does is that if the CPU utilization of the EC2 instances drops below 40%, the group shrinks. And if average usage rises above 40%, the auto-scaling group releases new instances. Do not worry, this applies only to the swarm working, as our manager is not controlled by the Auto Scaling group, so you will not lose control over the cluster.
 
@@ -1237,3 +1257,5 @@ $ aws autoscaling put-scaling-policy \
 ---
 
 Congratulations! You have launched you Docker Swarm cluster on AWS EC2 isntances with fully automated scaling strategy.
+
+<br><br><br>
