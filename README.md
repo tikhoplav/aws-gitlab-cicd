@@ -17,3 +17,7 @@ Greetings, reader. In this series of pages you will find some topics related to 
 
   I'm not a DevOps guy. I had worked with docker before, and thats it. But story turned that I was that guy who figured out how can new CI/CD pipeline coupled with the existing AWS resources be implemented. And this article is an essence of that experience squeezed in to step-by-step instruction, that any non-DevOps guy like me could understanc and reproduce.
 </details>
+
+## Articles:
+
+- [How to organize Docker Swarm cluster on AWS EC2 instances in Auto Scaling Group](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md);
