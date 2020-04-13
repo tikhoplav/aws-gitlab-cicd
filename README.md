@@ -26,4 +26,4 @@ Greetings, reader. In this series of pages you will find some topics related to 
 
 - [How to organize Docker Swarm cluster on AWS EC2 instances in Auto Scaling Group](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/swarm-cluster-on-aws-ec2.md);
 
-- [How to host GitLab Runner with the AWS EC2 instances in Auto Scaling Group](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-in-ec2.md);
+- [How to host GitLab Runner with the AWS EC2 instances in Auto Scaling Group](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md);

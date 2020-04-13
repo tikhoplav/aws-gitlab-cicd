@@ -6,7 +6,7 @@ Greetings, reader. In this tutorial we will configure **AWS** **EC2** instance t
 
 In this guide only *aws free tier* resources are used in order to give opportunity to reproduce it to anyone, also this configuration should not be used as the final production infrastruction for any commercial products. This servers only as a basic example.
 
-###Requirements
+### Requirements
 
 In order to reproduce steps of this tutorial we will need followings:
 
@@ -26,15 +26,15 @@ Before we begin, I suggest you to complete [preparation section of this tutorial
 
 In this section we will create all necessary aws networking resources, such as:
 
-- [VPC]();
+- [VPC](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#11-vpc-creation);
 
-- [Internet Gateway]();
+- [Internet Gateway](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#12-internet-gateway-creation);
 
-- [Security Group]();
+- [Security Group](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#13-security-group-creation);
 
-- [Subnet]();
+- [Subnet](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#14-subnet-creation);
 
-- [Route Table]().
+- [Route Table](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#15-route-table-configuration).
 
 For the sake of clarity we will create name all resources as `gitlab-runner` in this example. This configuration can be used to host **Gitlab Runners** for any **GitLab** project or, group *(as well as the future AMI)*. At the stage of **Auto Scaling Group** creation you should start to diffiriantiate you resources by the projects, as at this step unique project settings will be set. Untill then all of the represented steps are universal.
 
@@ -172,7 +172,10 @@ $ aws ec2 create-tags --resources subnet-07a3dbf45ca04d161 --tags Key=Name,Value
 After we have created a subnet, new route table should be automatically created. The easiest way to find it, is through the VPC we have just created:
 
 ```
-$ RT=$(aws ec2 describe-route-tables --filters Name=vpc-id,Values=$VPC --query "RouteTables[*].RouteTableId" --output text)
+$ RT=$(aws ec2 describe-route-tables \
+  --filters Name=vpc-id,Values=$VPC \
+  --query "RouteTables[*].RouteTableId" \
+  --output text)
 
 $ aws ec2 create-tags --resources $RT --tags Key=Name,Value=gitlab-runner
 ```
@@ -198,13 +201,13 @@ $ aws ec2 create-route \
 
 In this section we will create a prototype of the EC2 instance, that is capable to host **GitLab Runner**. After that we will create **Amazon Machine Image** in order to automate **GitLab Runner** hosting EC2 launch. In the next section this **AMI** will be used to create an **Auto Scale Group** to automate the whole process. Following steps will be covered in this section:
 
-- [GitLab Runner IAM EC2 role creation]();
+- [GitLab Runner IAM EC2 role creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#21-gitlab-runner-iam-ec2-role-creation);
 
-- [EC2 instance launch]();
+- [EC2 instance launch](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#22-ec2-instance-launch);
 
-- [GitLab Runner hosting EC2 instance configuration]();
+- [GitLab Runner hosting EC2 instance configuration](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#23-gitlab-runner-hosting-ec2-instance-configuration);
 
-- [GitLab Runner AMI creation]();
+- [GitLab Runner AMI creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#24-gitlab-runner-ami-creation);
 
 <br>
 
@@ -552,7 +555,9 @@ $ REGION=eu-central-1
 Then get list of repositories by running next comman *(Copy `perositoryName` value to clipboard)*: 
 
 ```
-$ aws ecr describe-repositories --region $REGION --query "repositories[*].{uri:repositoryUri,name:repositoryName}"
+$ aws ecr describe-repositories \
+  --region $REGION \
+  --query "repositories[*].{uri:repositoryUri,name:repositoryName}"
 
 [
     {
@@ -565,7 +570,9 @@ $ aws ecr describe-repositories --region $REGION --query "repositories[*].{uri:r
 In order get available tags of repository run:
 
 ```
-$ aws ecr list-images --region $REGION --repository-name nginx
+$ aws ecr list-images \
+  --region $REGION \
+  --repository-name nginx
 
 {
     "imageIds": [
@@ -660,7 +667,7 @@ $ sudo sed -i 's/"--user" "gitlab-runner"/"--user" "root"/' /etc/systemd/system/
 >
 > Plus, this way we could allow our runner environment to use ECR much easier *(Take a look to `sudo` in front of every command)*, without files coping and permission management.
 
-<br><br>
+<br>
 
 #### 2.3.4 Create Termination Sequence
 
@@ -708,7 +715,7 @@ $ sudo systemctl enable ec2-terminate.service
 Created symlink from /etc/systemd/system/shutdown.target.wants/ec2-terminate.service to /etc/systemd/system/ec2-terminate.service.
 ```
 
-<br><br>
+<br>
 
 #### 2.3.5 Clean up
 
@@ -752,11 +759,11 @@ The main reson for creating an autoscaling group is that our host EC2 is configu
 
 Next steps will be covered in this section:
 
-- [GitLab Runner Launch configuration creation]();
+- [GitLab Runner Launch configuration creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#31-gitlab-runner-launch-configuration-creation);
 
-- [GitLab Runner Auto Scaling group creation]();
+- [GitLab Runner Auto Scaling group creation](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#32-gitlab-runner-auto-scaling-group-creation);
 
-- [GitLab Runner hosted on AWS EC2 testing]();
+- [GitLab Runner hosted on AWS EC2 testing](https://github.com/tikhoplav/aws-gitlab-cicd/blob/master/gitlab-runner-on-ec2.md#33-gitlab-runner-hosted-on-aws-ec2-testing);
 
 <details>
 <summary>Env var required</summary>
